@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo Educativo de Educação Financeira</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Poppins:wght@600;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    /* CSS Custom Properties for Dark Theme and Palette */
+    :root {
+      --color-bg: #121212;
+      --color-bg-alt: #1e1e1e;
+      --color-primary: #00c6ff;
+      --color-primary-dark: #008faf;
+      --color-secondary: #ff6584;
+      --color-text-primary: #e0e0e0;
+      --color-text-secondary: #a0a0a0;
+      --color-shadow: rgba(0, 198, 255, 0.3);
+      --color-card-bg: rgba(255 255 255 / 0.05);
+      --color-error: #ff4c4c;
+      --color-success: #2ecc71;
+      --border-radius: 0.75rem;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+      --font-heading: 'Poppins', 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --max-width: 1200px;
+    }
+
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      font-family: var(--font-body);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 1rem;
+      user-select: none;
+    }
+
+    h1,h2,h3,h4 {
+      font-family: var(--font-heading);
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    button {
+      font-family: var(--font-heading);
+      background: var(--color-primary);
+      color: var(--color-bg);
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0.75rem 1.5rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background var(--transition);
+      box-shadow: 0 0 8px var(--color-shadow);
+      user-select: none;
+    }
+    button:hover, button:focus {
+      background: var(--color-primary-dark);
+      outline: none;
+      transform: scale(1.05);
+    }
+
+    button.secondary {
+      background: var(--color-secondary);
+      color: var(--color-bg);
+      box-shadow: 0 0 8px rgb(255 101 132 / 0.5);
+    }
+    button.secondary:hover, button.secondary:focus {
+      background: #d94368;
+      transform: scale(1.05);
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Opening screen */
+    #open-screen {
+      flex-grow: 1;
+      max-width: 480px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 2rem;
+      background: var(--color-bg-alt);
+      border-radius: var(--border-radius);
+      box-shadow: 0 0 24px rgba(0 198 255 / 0.2);
+      position: relative;
+    }
+
+    #open-screen h1 {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      user-select: text;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--color-primary);
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      user-select: text;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      border-radius: var(--border-radius);
+      border: none;
+      font-size: 1rem;
+      width: 100%;
+      background: var(--color-bg);
+      color: var(--color-text-primary);
+      box-shadow: inset 0 0 6px rgba(255 255 255 / 0.1);
+      transition: box-shadow var(--transition);
+    }
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: inset 0 0 10px var(--color-primary);
+    }
+
+    /* Photo selection */
+    .photo-selection {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: border-color var(--transition), transform var(--transition);
+      filter: drop-shadow(0 0 0.2rem rgba(0,0,0,0.4));
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+    .avatar.selected {
+      border-color: var(--color-primary);
+      transform: scale(1.1);
+      box-shadow: 0 0 14px var(--color-primary);
+    }
+
+    /* Buttons row in open screen */
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+
+    /* Credits small on bottom */
+    #bottom-credits {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+      user-select: none;
+      font-family: var(--font-heading);
+    }
+
+    /* Game Board */
+    #game-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: var(--max-width);
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+
+    /* Board grid */
+    .board {
+      position: relative;
+      width: 90vw;
+      max-width: 640px;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(135deg, #222639, #32394f);
+      border-radius: var(--border-radius);
+      box-shadow: 0 0 20px rgba(0 198 255 / 0.4);
+      display: grid;
+      grid-template-rows: repeat(5, 1fr);
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      padding: 8px;
+    }
+    .square {
+      background: var(--color-bg-alt);
+      border-radius: var(--border-radius);
+      box-shadow: inset 0 0 8px rgba(0 0 0 / 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      font-size: 1.1rem;
+      user-select: none;
+      transition: background-color var(--transition), color var(--transition);
+    }
+    .square.active-player {
+      background: var(--color-primary);
+      color: var(--color-bg);
+      box-shadow: 0 0 12px var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* Player objects and positions */
+    .player-corner {
+      position: absolute;
+      width: 120px;
+      min-height: 80px;
+      background: var(--color-card-bg);
+      border-radius: var(--border-radius);
+      padding: 0.5rem;
+      color: var(--color-text-primary);
+      box-shadow: 0 0 10px rgba(0 198 255 / 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .player-1 { top: 8px; left: 8px; }
+    .player-2 { top: 8px; right: 8px; }
+    .player-3 { bottom: 8px; left: 8px; }
+    .player-4 { bottom: 8px; right: 8px; }
+
+    .player-name {
+      font-weight: 700;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-object {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.5rem;
+      background-size: cover;
+      background-position: center;
+      margin-top: 0.3rem;
+      box-shadow: 0 0 6px var(--color-primary);
+      align-self: center;
+    }
+
+    /* Card pile and card */
+    #card-pile {
+      margin-top: 1rem;
+      cursor: pointer;
+      width: 50px;
+      height: 70px;
+      background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+      border-radius: 0.5rem;
+      box-shadow: 0 0 14px var(--color-primary);
+      user-select: none;
+      transition: transform var(--transition);
+    }
+    #card-pile:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 22px var(--color-primary);
+    }
+    #card-display {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90vw;
+      max-width: 450px;
+      max-height: 600px;
+      background: var(--color-bg-alt);
+      border-radius: var(--border-radius);
+      box-shadow: 0 0 30px var(--color-primary);
+      transform: translate(-50%, -50%);
+      display: none;
+      flex-direction: column;
+      padding: 1.5rem;
+      color: var(--color-text-primary);
+      font-family: var(--font-heading);
+      user-select: text;
+      z-index: 1000;
+    }
+    #card-question {
+      flex-grow: 1;
+      overflow-y: auto;
+      font-weight: 600;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    #card-answers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .answer-btn {
+      background: var(--color-primary);
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--color-bg);
+      font-size: 1rem;
+      transition: background var(--transition), transform var(--transition);
+      user-select: none;
+    }
+    .answer-btn:hover, .answer-btn:focus {
+      background: var(--color-primary-dark);
+      outline: none;
+      transform: scale(1.05);
+    }
+    .answer-btn.correct {
+      background: var(--color-success);
+      color: var(--color-bg);
+      cursor: default;
+    }
+    .answer-btn.wrong {
+      background: var(--color-error);
+      color: var(--color-bg);
+      cursor: default;
+    }
+
+    #card-close {
+      align-self: flex-end;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--color-secondary);
+      font-weight: 700;
+      user-select: none;
+      transition: color var(--transition);
+    }
+    #card-close:hover {
+      color: var(--color-primary);
+    }
+
+    /* Notification */
+    #notification {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius);
+      background: var(--color-success);
+      color: var(--color-bg);
+      font-weight: 700;
+      box-shadow: 0 0 16px var(--color-success);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      z-index: 1100;
+    }
+    #notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Win screen */
+    #win-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: var(--color-bg);
+      font-family: var(--font-heading);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+      user-select: text;
+      z-index: 1500;
+    }
+    #win-screen h2 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 8px var(--color-bg);
+    }
+    #win-continue-btn {
+      margin-top: 2rem;
+      background: var(--color-bg);
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 0.85rem 2rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px var(--color-bg);
+    }
+    #win-continue-btn:hover {
+      background: var(--color-primary);
+      color: var(--color-bg);
+      box-shadow: 0 0 16px var(--color-primary);
+      transform: scale(1.05);
+    }
+
+    /* Credits screen */
+    #credits-screen {
+      display: none;
+      flex-direction: column;
+      max-width: 600px;
+      background: var(--color-bg-alt);
+      border-radius: var(--border-radius);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 0 20px rgba(255 255 255 / 0.15);
+      font-family: var(--font-body);
+      text-align: center;
+      color: var(--color-text-primary);
+      user-select: text;
+      gap: 1rem;
+      margin: 3rem auto;
+    }
+    #credits-screen h3 {
+      color: var(--color-primary);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .credit-role {
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+    .credit-item {
+      font-size: 1rem;
+    }
+    .credit-section {
+      margin-bottom: 1rem;
+    }
+    #credits-footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .player-corner {
+        position: static;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+      }
+      .board {
+        width: 100vw;
+        aspect-ratio: auto;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+      }
+      #open-screen {
+        max-width: 100%;
+      }
+      #card-display {
+        width: 95vw;
+        max-width: unset;
+        max-height: 90vh;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <!-- Opening Screen -->
+    <section id="open-screen" aria-label="Tela de Abertura do Jogo">
+      <h1>Jogo de Educação Financeira</h1>
+      <label for="nickname">Digite seu Nickname:</label>
+      <input type="text" id="nickname" aria-describedby="nickdesc" placeholder="Seu apelido" maxlength="15" autocomplete="off" />
+      <div class="photo-selection" aria-label="Seleção de avatar">
+        <div tabindex="0" role="button" aria-pressed="false" class="avatar" style="background-image:url('https://i.pravatar.cc/64?img=12');" data-avatar="avatar1" aria-label="Avatar 1"></div>
+        <div tabindex="0" role="button" aria-pressed="false" class="avatar" style="background-image:url('https://i.pravatar.cc/64?img=5');" data-avatar="avatar2" aria-label="Avatar 2"></div>
+        <div tabindex="0" role="button" aria-pressed="false" class="avatar" style="background-image:url('https://i.pravatar.cc/64?img=17');" data-avatar="avatar3" aria-label="Avatar 3"></div>
+        <div tabindex="0" role="button" aria-pressed="false" class="avatar" style="background-image:url('https://i.pravatar.cc/64?img=23');" data-avatar="avatar4" aria-label="Avatar 4"></div>
+      </div>
+      <div class="button-row">
+        <button id="btn-exit" class="secondary" aria-label="Sair do jogo">Sair</button>
+        <button id="btn-multiplayer" aria-label="Jogar Multiplayer" disabled>Jogar Multiplayer</button>
+      </div>
+      <div id="bottom-credits" aria-hidden="true">Feito por Jorge Sanches &amp; Yasmin</div>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="game-screen" aria-label="Tela do jogo">
+      <div class="board" aria-label="Tabuleiro do jogo" role="grid" aria-readonly="true" aria-live="polite">
+        <!-- 25 squares 1 to 25 -->
+        <div class="square" data-index="25" style="grid-area: 1 / 1 / 2 / 2;">25</div>
+        <div class="square" data-index="24" style="grid-area: 1 / 2 / 2 / 3;">24</div>
+        <div class="square" data-index="23" style="grid-area: 1 / 3 / 2 / 4;">23</div>
+        <div class="square" data-index="22" style="grid-area: 1 / 4 / 2 / 5;">22</div>
+        <div class="square" data-index="21" style="grid-area: 1 / 5 / 2 / 6;">21</div>
+        <div class="square" data-index="20" style="grid-area: 2 / 5 / 3 / 6;">20</div>
+        <div class="square" data-index="19" style="grid-area: 3 / 5 / 4 / 6;">19</div>
+        <div class="square" data-index="18" style="grid-area: 4 / 5 / 5 / 6;">18</div>
+        <div class="square" data-index="17" style="grid-area: 5 / 5 / 6 / 6;">17</div>
+        <div class="square" data-index="16" style="grid-area: 5 / 4 / 6 / 5;">16</div>
+        <div class="square" data-index="15" style="grid-area: 5 / 3 / 6 / 4;">15</div>
+        <div class="square" data-index="14" style="grid-area: 5 / 2 / 6 / 3;">14</div>
+        <div class="square" data-index="13" style="grid-area: 5 / 1 / 6 / 2;">13</div>
+        <div class="square" data-index="12" style="grid-area: 4 / 1 / 5 / 2;">12</div>
+        <div class="square" data-index="11" style="grid-area: 3 / 1 / 4 / 2;">11</div>
+        <div class="square" data-index="10" style="grid-area: 2 / 1 / 3 / 2;">10</div>
+        <div class="square" data-index="9"  style="grid-area: 2 / 2 / 3 / 3;">9</div>
+        <div class="square" data-index="8"  style="grid-area: 2 / 3 / 3 / 4;">8</div>
+        <div class="square" data-index="7"  style="grid-area: 2 / 4 / 3 / 5;">7</div>
+        <div class="square" data-index="6"  style="grid-area: 3 / 4 / 4 / 5;">6</div>
+        <div class="square" data-index="5"  style="grid-area: 4 / 4 / 5 / 5;">5</div>
+        <div class="square" data-index="4"  style="grid-area: 4 / 3 / 5 / 4;">4</div>
+        <div class="square" data-index="3"  style="grid-area: 4 / 2 / 5 / 3;">3</div>
+        <div class="square" data-index="2"  style="grid-area: 3 / 3 / 4 / 4;">2</div>
+        <div class="square" data-index="1"  style="grid-area: 3 / 2 / 4 / 3;">1</div>
+      </div>
+
+      <!-- Player corners -->
+      <div class="player-corner player-1" aria-live="polite" aria-label="Jogador 1 Info">
+        <div class="player-name" id="player1-name">-</div>
+        <div class="player-object" id="player1-object" aria-label="Objeto do jogador 1"></div>
+        <div class="player-position" id="player1-position">Pos: 1</div>
+      </div>
+      <div class="player-corner player-2" aria-live="polite" aria-label="Jogador 2 Info">
+        <div class="player-name" id="player2-name">-</div>
+        <div class="player-object" id="player2-object" aria-label="Objeto do jogador 2"></div>
+        <div class="player-position" id="player2-position">Pos: 1</div>
+      </div>
+      <div class="player-corner player-3" aria-live="polite" aria-label="Jogador 3 Info">
+        <div class="player-name" id="player3-name">-</div>
+        <div class="player-object" id="player3-object" aria-label="Objeto do jogador 3"></div>
+        <div class="player-position" id="player3-position">Pos: 1</div>
+      </div>
+      <div class="player-corner player-4" aria-live="polite" aria-label="Jogador 4 Info">
+        <div class="player-name" id="player4-name">-</div>
+        <div class="player-object" id="player4-object" aria-label="Objeto do jogador 4"></div>
+        <div class="player-position" id="player4-position">Pos: 1</div>
+      </div>
+
+      <!-- Card pile -->
+      <div id="card-pile" role="button" aria-label="Comprar carta" tabindex="0" title="Clique para tirar uma carta"></div>
+    </section>
+
+    <!-- Card Display -->
+    <section id="card-display" aria-live="assertive" aria-modal="true" role="dialog" aria-label="Pergunta do jogo" aria-hidden="true">
+      <div id="card-close" role="button" aria-label="Fechar pergunta" tabindex="0" title="Fechar pergunta">&times;</div>
+      <div id="card-question"></div>
+      <div id="card-answers"></div>
+    </section>
+
+    <!-- Notification -->
+    <div id="notification" role="alert" aria-live="assertive"></div>
+
+    <!-- Win Screen -->
+    <section id="win-screen" role="dialog" aria-modal="true" aria-label="Tela de vitória" tabindex="-1">
+      <h2>Parabéns, você ganhou!</h2>
+      <button id="win-continue-btn" aria-label="Continuar para créditos">Continuar</button>
+    </section>
+
+    <!-- Credits Screen -->
+    <section id="credits-screen" role="contentinfo" aria-label="Créditos">
+      <h3>Créditos</h3>
+      <div class="credit-section">
+        <div class="credit-item"><strong>Jorge Sanches</strong> | Desenvolvedor Criador dos códigos</div>
+        <div class="credit-item"><strong>Yasmin</strong> | Designer Visual</div>
+        <div class="credit-item"><strong>Yasmin</strong> | Roteirista</div>
+        <div class="credit-item"><strong>Jorge Sanches</strong> | Roteirista</div>
+      </div>
+      <div class="credit-section"><p>Fins educativos</p></div>
+      <div class="credit-section"><p>Direitos Autorais para Isaías</p></div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // Player avatars choices (the same images in opening screen avatars)
+      const avatarUrls = {
+        avatar1: 'https://i.pravatar.cc/64?img=12',
+        avatar2: 'https://i.pravatar.cc/64?img=5',
+        avatar3: 'https://i.pravatar.cc/64?img=17',
+        avatar4: 'https://i.pravatar.cc/64?img=23',
+      };
+
+      // Player objects choices
+      const objectsList = [
+        { id: 'carro', name: 'Carro', color: '#00c6ff', emoji: '🚗' },
+        { id: 'bolsa', name: 'Bolsa', color: '#ff6584', emoji: '👜' },
+        { id: 'livro', name: 'Livro', color: '#8a4fff', emoji: '📚' },
+        { id: 'moeda', name: 'Moeda', color: '#ffb300', emoji: '🪙' },
+      ];
+
+      // Sample financial education questions for 7th grade
+      // Each question includes: question, options, correct answer index, level (1-easy, 2-hard)
+      const questions = [
+        {
+          question: 'O que é orçamento doméstico?',
+          options: [
+            'Planejamento de receitas e despesas familiares',
+            'Compra de bens de luxo',
+            'Investir em ações de empresas',
+            'Economizar sem planejar',
+          ],
+          correct: 0,
+          level: 1,
+        },
+        {
+          question: 'Por que é importante ter uma reserva financeira?',
+          options: [
+            'Para gastar em momentos de lazer',
+            'Para cobrir despesas inesperadas',
+            'Para fazer dívidas',
+            'Para comprar mais cartões de crédito',
+          ],
+          correct: 1,
+          level: 1,
+        },
+        {
+          question: 'Qual a função dos juros em um empréstimo?',
+          options: [
+            'Pagar menos dinheiro no futuro',
+            'Recompensar o banco pelo empréstimo',
+            'Não influenciam no valor a pagar',
+            'São um tipo de imposto',
+          ],
+          correct: 1,
+          level: 2,
+        },
+        {
+          question: 'O que significa diversificar investimentos?',
+          options: [
+            'Investir todo o dinheiro em um tipo de ação',
+            'Distribuir investimentos em diferentes aplicações',
+            'Evitar investir para não perder dinheiro',
+            'Fazer apenas aplicações de curto prazo',
+          ],
+          correct: 1,
+          level: 2,
+        },
+        {
+          question: 'O que é inflação?',
+          options: [
+            'Aumento geral dos preços e perda do poder de compra',
+            'Redução dos preços dos produtos',
+            'Aumento do salário mínimo',
+            'Desemprego em massa',
+          ],
+          correct: 0,
+          level: 2,
+        }
+      ];
+
+      // State
+      const state = {
+        players: [], // { nickname, avatarKey, objectId, position }
+        currentPlayerIndex: 0,
+        gameStarted: false,
+        canDrawCard: false,
+      };
+
+      // DOM elements
+      const openScreenEl = document.getElementById('open-screen');
+      const nicknameInputEl = document.getElementById('nickname');
+      const avatarsEls = [...document.querySelectorAll('.avatar')];
+      const btnMultiplayer = document.getElementById('btn-multiplayer');
+      const btnExit = document.getElementById('btn-exit');
+      const gameScreenEl = document.getElementById('game-screen');
+      const playerSlots = [
+        { nameEl: document.getElementById('player1-name'), objectEl: document.getElementById('player1-object'), posEl: document.getElementById('player1-position') },
+        { nameEl: document.getElementById('player2-name'), objectEl: document.getElementById('player2-object'), posEl: document.getElementById('player2-position') },
+        { nameEl: document.getElementById('player3-name'), objectEl: document.getElementById('player3-object'), posEl: document.getElementById('player3-position') },
+        { nameEl: document.getElementById('player4-name'), objectEl: document.getElementById('player4-object'), posEl: document.getElementById('player4-position') },
+      ];
+      const cardPileEl = document.getElementById('card-pile');
+      const cardDisplayEl = document.getElementById('card-display');
+      const cardQuestionEl = document.getElementById('card-question');
+      const cardAnswersEl = document.getElementById('card-answers');
+      const cardCloseBtn = document.getElementById('card-close');
+      const notificationEl = document.getElementById('notification');
+      const winScreenEl = document.getElementById('win-screen');
+      const winContinueBtn = document.getElementById('win-continue-btn');
+      const creditsScreenEl = document.getElementById('credits-screen');
+
+      // Utility function: show notification
+      function showNotification(message, duration = 3000) {
+        notificationEl.textContent = message;
+        notificationEl.classList.add('show');
+        setTimeout(() => notificationEl.classList.remove('show'), duration);
+      }
+
+      // HANDLE avatar selection on open screen
+      let selectedAvatarKey = null;
+      avatarsEls.forEach((avatarEl) => {
+        avatarEl.addEventListener('click', () => {
+          selectAvatar(avatarEl.dataset.avatar);
+        });
+        avatarEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectAvatar(avatarEl.dataset.avatar);
+          }
+        });
+      });
+
+      function selectAvatar(key) {
+        selectedAvatarKey = key;
+        avatarsEls.forEach((el) => {
+          const pressed = el.dataset.avatar === key ? 'true' : 'false';
+          el.setAttribute('aria-pressed', pressed);
+          el.classList.toggle('selected', el.dataset.avatar === key);
+        });
+        validateStart();
+      }
+
+      // Validate start game button enablement
+      function validateStart() {
+        const nick = nicknameInputEl.value.trim();
+        btnMultiplayer.disabled = !(nick.length > 0 && selectedAvatarKey !== null);
+      }
+
+      nicknameInputEl.addEventListener('input', validateStart);
+
+      // Handle exit button
+      btnExit.addEventListener('click', () => {
+        if (confirm('Deseja realmente sair do jogo?')) {
+          window.close();
+          showNotification('Função sair não suportada no navegador');
+        }
+      });
+
+      // Start multiplayer game - begin with players array
+      btnMultiplayer.addEventListener('click', () => {
+        // Create a single player in this demo with nickname and avatar selected
+        // To simulate multiplayer, add a second and third player with preset data
+        const nick = nicknameInputEl.value.trim();
+        if (!nick || !selectedAvatarKey) return;
+
+        // Reset state
+        state.players = [
+          { nickname: nick, avatarKey: selectedAvatarKey, objectId: null, position: 1 },
+          { nickname: 'Julia', avatarKey: 'avatar2', objectId: null, position: 1 },
+          { nickname: 'Carlos', avatarKey: 'avatar3', objectId: null, position: 1 },
+          { nickname: 'Ana', avatarKey: 'avatar4', objectId: null, position: 1 },
+        ];
+
+        // Immediately choose objects for each player
+        askObjectSelection();
+      });
+
+      // Object selection process
+
+      let selectingObjectPlayerIndex = 0;
+
+      function askObjectSelection() {
+        const player = state.players[selectingObjectPlayerIndex];
+        // Show prompt (simple modal style) to select player object
+        showObjectSelectionModal(player);
+      }
+
+      // Build an object selection modal overlaid on game screen
+      function showObjectSelectionModal(player) {
+        // We'll reuse the card display section for this but replace contents
+        cardDisplayEl.style.display = 'flex';
+        cardDisplayEl.setAttribute('aria-hidden', 'false');
+        cardQuestionEl.textContent = `Jogador ${player.nickname}, escolha um objeto:`;
+        cardAnswersEl.innerHTML = '';
+        cardCloseBtn.style.display = 'none'; // prevent closing here
+
+        objectsList.forEach((obj, idx) => {
+          const btn = document.createElement('button');
+          btn.textContent = obj.emoji + ' ' + obj.name;
+          btn.className = 'answer-btn';
+          btn.style.backgroundColor = obj.color;
+          btn.style.color = '#121212';
+          btn.addEventListener('click', () => {
+            player.objectId = obj.id;
+            selectingObjectPlayerIndex++;
+            if (selectingObjectPlayerIndex < state.players.length) {
+              showObjectSelectionModal(state.players[selectingObjectPlayerIndex]);
+            } else {
+              // All selected objects - close modal and start game
+              cardDisplayEl.style.display = 'none';
+              cardDisplayEl.setAttribute('aria-hidden', 'true');
+              selectingObjectPlayerIndex = 0;
+              startGame();
+            }
+          });
+          cardAnswersEl.appendChild(btn);
+        });
+      }
+
+      // Start game setup
+      function startGame() {
+        state.gameStarted = true;
+        state.currentPlayerIndex = 0;
+
+        // Hide opening, show game screen
+        openScreenEl.style.display = 'none';
+        gameScreenEl.style.display = 'flex';
+
+        updatePlayerUI();
+        highlightCurrentPlayer();
+        state.canDrawCard = true;
+        showNotification(`Turno de ${state.players[state.currentPlayerIndex].nickname}`);
+      }
+
+      // Update player UI info
+      function updatePlayerUI() {
+        state.players.forEach((player, i) => {
+          const slot = playerSlots[i];
+          slot.nameEl.textContent = player.nickname;
+          slot.objectEl.textContent = '';
+          slot.objectEl.style.backgroundImage = `url(${avatarUrls[player.avatarKey]})`;
+          slot.posEl.textContent = 'Pos: ' + player.position;
+          // Add emoji to object if selected
+          if (player.objectId) {
+            const obj = objectsList.find(o => o.id === player.objectId);
+            if (obj) {
+              slot.objectEl.textContent = obj.emoji;
+              slot.objectEl.style.backgroundColor = obj.color;
+              slot.objectEl.style.color = '#121212';
+              slot.objectEl.style.fontSize = '2rem';
+              slot.objectEl.style.textAlign = 'center';
+              slot.objectEl.style.lineHeight = '48px';
+              slot.objectEl.style.backgroundImage = 'none';
+              slot.objectEl.style.boxShadow = `0 0 10px ${obj.color}`;
+              slot.objectEl.style.borderRadius = '0.5rem';
+              slot.objectEl.style.userSelect = 'none';
+            }
+          }
+        });
+
+        // Update board squares highlight for players
+        document.querySelectorAll('.square').forEach(sq => sq.classList.remove('active-player'));
+        state.players.forEach((player, i) => {
+          const square = document.querySelector(`.square[data-index="${player.position}"]`);
+          if (square) {
+            square.classList.add('active-player');
+          }
+        });
+      }
+
+      // Highlights the current player's corner with glow/border
+      function highlightCurrentPlayer() {
+        playerSlots.forEach((slot, i) => {
+          if (i === state.currentPlayerIndex) {
+            slot.nameEl.style.textShadow = '0 0 10px var(--color-primary)';
+            slot.nameEl.style.color = 'var(--color-primary)';
+          } else {
+            slot.nameEl.style.textShadow = 'none';
+            slot.nameEl.style.color = 'var(--color-text-primary)';
+          }
+        });
+      }
+
+      // Card pile click handler
+      cardPileEl.addEventListener('click', () => {
+        if (!state.gameStarted) return;
+        if (!state.canDrawCard) return;
+
+        state.canDrawCard = false;
+        showRandomQuestionCard();
+      });
+
+      cardPileEl.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && state.canDrawCard) {
+          e.preventDefault();
+          cardPileEl.click();
+        }
+      });
+
+      // Show a random question card on the card-display modal
+      let currentQuestion = null;
+      function showRandomQuestionCard() {
+        // Pick a random question from questions array
+        currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+        cardQuestionEl.textContent = currentQuestion.question;
+
+        cardAnswersEl.innerHTML = '';
+        cardCloseBtn.style.display = 'none';
+
+        currentQuestion.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'answer-btn';
+          btn.textContent = opt;
+          btn.setAttribute('data-option-index', idx);
+          btn.addEventListener('click', () => handleAnswer(idx, btn));
+          cardAnswersEl.appendChild(btn);
+        });
+        cardDisplayEl.style.display = 'flex';
+        cardDisplayEl.setAttribute('aria-hidden', 'false');
+        cardCloseBtn.focus();
+      }
+
+      // Close card display (only after answer)
+      cardCloseBtn.addEventListener('click', closeCardDisplay);
+      cardCloseBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          closeCardDisplay();
+        }
+      });
+
+      function closeCardDisplay() {
+        cardDisplayEl.style.display = 'none';
+        cardDisplayEl.setAttribute('aria-hidden', 'true');
+      }
+
+      // Handle answer selection
+      function handleAnswer(selectedIndex, btn) {
+        // Disable all buttons
+        Array.from(cardAnswersEl.children).forEach(b => b.disabled = true);
+
+        const correctIndex = currentQuestion.correct;
+        const player = state.players[state.currentPlayerIndex];
+
+        if (selectedIndex === correctIndex) {
+          btn.classList.add('correct');
+          // Advance one or two squares based on level
+          let advance = currentQuestion.level === 2 ? 2 : 1;
+          player.position = Math.min(player.position + advance, 25);
+          updatePlayerUI();
+          showNotification(`Resposta correta! Avance ${advance} casa(s).`, 3000);
+        } else {
+          btn.classList.add('wrong');
+          // Move back one or two squares based on level
+          let back = currentQuestion.level === 2 ? 2 : 1;
+          player.position = Math.max(player.position - back, 1);
+          updatePlayerUI();
+          showNotification(`Resposta errada! Volte ${back} casa(s).`, 3000);
+        }
+
+        // Delay for user to see answer results then close card and change turn or finish
+        setTimeout(() => {
+          closeCardDisplay();
+
+          // Check if player won
+          if (player.position === 25) {
+            showWinScreen(player.nickname);
+          } else {
+            // Next player's turn
+            state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+            highlightCurrentPlayer();
+            state.canDrawCard = true;
+            showNotification(`Turno de ${state.players[state.currentPlayerIndex].nickname}`);
+          }
+        }, 1800);
+      }
+
+      // Show win screen
+      function showWinScreen(winnerName) {
+        winScreenEl.style.display = 'flex';
+        winScreenEl.querySelector('h2').textContent = `Parabéns, ${winnerName}! Você ganhou!`;
+        winScreenEl.focus();
+        state.gameStarted = false;
+        state.canDrawCard = false;
+        gameScreenEl.style.filter = 'blur(4px)';
+      }
+
+      // Win continue button
+      winContinueBtn.addEventListener('click', () => {
+        winScreenEl.style.display = 'none';
+        gameScreenEl.style.filter = 'none';
+        showCreditsScreen();
+      });
+
+      // Show credits screen
+      function showCreditsScreen() {
+        creditsScreenEl.style.display = 'flex';
+        creditsScreenEl.focus();
+      }
+
+      // Accessibility: Trap focus when modal shown (card-display and win-screen)
+      function trapFocus(element) {
+        const focusableElements = element.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+        if (focusableElements.length === 0) return;
+
+        let firstEl = focusableElements[0];
+        let lastEl = focusableElements[focusableElements.length - 1];
+
+        element.addEventListener('keydown', function(event) {
+          if (event.key === 'Tab') {
+            if (event.shiftKey) {
+              // Shift+Tab
+              if (document.activeElement === firstEl) {
+                event.preventDefault();
+                lastEl.focus();
+              }
+            } else {
+              // Tab
+              if (document.activeElement === lastEl) {
+                event.preventDefault();
+                firstEl.focus();
+              }
+            }
+          }
+          if (event.key === 'Escape') {
+            // Close card display on ESC if visible
+            if (element === cardDisplayEl && cardDisplayEl.style.display === 'flex') {
+              closeCardDisplay();
+              state.canDrawCard = true;
+            }
+            if (element === winScreenEl && winScreenEl.style.display === 'flex') {
+              // Do not close win screen with ESC
+              event.preventDefault();
+            }
+          }
+        });
+      }
+      trapFocus(cardDisplayEl);
+      trapFocus(winScreenEl);
+
+    })();
+  </script>
+</body>
+</html>
+
